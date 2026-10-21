@@ -1,19 +1,20 @@
 const { Events } = require('discord.js');
-const config = require('../config');
+const globalConfig = require('../config');
 
 module.exports = {
   name: Events.MessageCreate,
   async execute(message, client) {
     if (message.author.bot || !message.guild) return;
 
-    // Counting system
     const handled = await client.counting.handleMessage(message);
     if (handled) return;
 
-    // Prefix commands
-    if (!message.content.startsWith(config.prefix)) return;
+    const gcfg = client.guildConfig.get(message.guild.id);
+    const prefix = gcfg.prefix || globalConfig.prefix || '!';
 
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+    if (!message.content.startsWith(prefix)) return;
+
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
     const command = client.commands.get(commandName);
